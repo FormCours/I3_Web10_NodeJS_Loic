@@ -13,12 +13,12 @@ const server = http.createServer((req, res) => {
 
     // Lecture du fichier
     fs.readFile("./content/datas.json", (errorFile, datas) => {
-        if(errorFile) {
+        if (errorFile) {
             console.log(errorFile);
 
             contentRes = "<h1>Erreur du serveur</h1>"
-                        + "<h2>Le fichier \"data.json\" est en erreur</h2>";
-            
+                + "<h2>Le fichier \"data.json\" est en erreur</h2>";
+
             res.writeHead(500, head);
             res.write(contentRes);
             res.end();
@@ -53,62 +53,11 @@ const server = http.createServer((req, res) => {
                 res.end();
             }
             else if (urlParse.pathname.includes("/categs")) {
+                //Exemple de regex
+                const demoRegex = /test/;
 
-                if (urlParse.pathname.includes("/subcategs")) {
-
-                    if (urlParse.pathname.includes("/products")) {
-                        if (urlParse.query.productID)//localhost:3000/categs/subcategs/products?categID=1&subcategID=2&productID=42
-                        {
-                            statusCode = 200;
-                            contentRes = `<h1>Vous êtes sur un produit</h1>
-                        <p>Categ principale : ${urlParse.query.categID}</p>
-                        <p>Categ secondaire : ${urlParse.query.subcategID}</p>
-                        <p>Produit sélectionné : ${urlParse.query.productID}<p>`;
-
-                            res.writeHead(statusCode, head);
-                            res.write(contentRes);
-                            res.end();
-                        }
-                        else //localhost:3000/categs/subcategs/products?categID=1&subcategID=2
-                        {
-                            statusCode = 200;
-                            contentRes = `<h1>Vous êtes sur la liste des produits</h1>
-                        <p>Categ principale : ${urlParse.query.categID}</p>
-                        <p>Categ secondaire : ${urlParse.query.subcategID}</p>
-                        <ul>
-                            <li><a href="/categs/subcategs/products?categID=${urlParse.query.categID}&subcategID=${urlParse.query.subcategID}&productID=1">Product 1</a></li>
-                            <li><a href="/categs/subcategs/products?categID=${urlParse.query.categID}&subcategID=${urlParse.query.subcategID}&productID=2">Product 2</a></li>
-                            <li><a href="/categs/subcategs/products?categID=${urlParse.query.categID}&subcategID=${urlParse.query.subcategID}&productID=3">Product 3</a></li>
-                            <li><a href="/categs/subcategs/products?categID=${urlParse.query.categID}&subcategID=${urlParse.query.subcategID}&productID=4">Product 4</a></li>
-                        </ul>
-                        `;
-
-                            res.writeHead(statusCode, head);
-                            res.write(contentRes);
-                            res.end();
-                        }
-
-                    }
-                    else//localhost:3000/categs/subcategs?categID=1
-                    {
-                        statusCode = 200;
-                        contentRes = `<h1>Vous êtes sur les catégories secondaires</h1>
-                    <p>Categ principale : ${urlParse.query.categID}</p>
-                    <ul>
-                        <li><a href="/categs/subcategs/products?categID=${urlParse.query.categID}&subcategID=1">Subcateg 1</a></li>
-                        <li><a href="/categs/subcategs/products?categID=${urlParse.query.categID}&subcategID=2">Subcateg 2</a></li>
-                        <li><a href="/categs/subcategs/products?categID=${urlParse.query.categID}&subcategID=3">Subcateg 3</a></li>
-                        <li><a href="/categs/subcategs/products?categID=${urlParse.query.categID}&subcategID=4">Subcateg 4</a></li>
-                    </ul>
-                    `;
-
-                        res.writeHead(statusCode, head);
-                        res.write(contentRes);
-                        res.end();
-                    }
-                }
-                else //localhost:3000/categs
-                {
+                // Categs : 	localhost:3000/categs
+                if (urlParse.pathname === "/categs") {
                     statusCode = 200;
 
                     contentRes = `<h1>Vous êtes sur les catégories principales</h1>
@@ -125,16 +74,28 @@ const server = http.createServer((req, res) => {
                     res.write(contentRes);
                     res.end();
                 }
-            }
-            else {
-                statusCode = 404;
-                contentRes = "<h1>Oops, page non trouvée</h1>";
+                else if (/^\/categs\/[1-9][0-9]*\/subcategs/.test(urlParse.pathname)) {
 
-                res.writeHead(statusCode, head);
-                res.write(contentRes);
-                res.end();
-            }
+                    // Sous-categs :	localhost:3000/categs/42/subcategs
 
+                    // Detail Sub 2 :	localhost:3000/categs/42/subcategs/2
+
+                    // products : 	    localhost:3000/categs/42/subcategs/2/products
+
+                    // product 13 :	    localhost:3000/categs/42/subcategs/2/products?prod=13
+
+
+
+                    res.writeHead(statusCode, head);
+                    res.write("Url -> " + urlParse.pathname);
+                    res.end();
+                }
+                else {
+                    res.writeHead(404, head);
+                    res.write("Not found");
+                    res.end();
+                }
+            }
         }
         else if (req.method == "POST") {
             if (urlParse.pathname == "/contact") {
