@@ -1,6 +1,7 @@
 const http = require("http");
 const url = require("url");
 const fs = require("fs");
+const { parse } = require('path');
 
 
 const server = http.createServer((req, res) => {
@@ -53,10 +54,12 @@ const server = http.createServer((req, res) => {
                 res.end();
             }
             else if (urlParse.pathname.includes("/categs")) {
-                //Exemple de regex
+                //Exemple d'ecriture d'une regex en JS
                 const demoRegex = /test/;
 
-                // Categs : 	localhost:3000/categs
+                let error404 = null;
+
+                // Categs : 	/categs
                 if (urlParse.pathname === "/categs") {
                     statusCode = 200;
 
@@ -65,7 +68,7 @@ const server = http.createServer((req, res) => {
 
                     // On parcours les catégories principal du fichier
                     datas.categs.forEach(itemCateg => {
-                        contentRes += `<li><a href="/categs/subcategs?categID=${itemCateg.id}">${itemCateg.name}</a></li>`;
+                        contentRes += `<li><a href="/categs/${itemCateg.id}/subcategs">${itemCateg.name}</a></li>`;
                     });
 
                     contentRes += `</ul>`;
@@ -74,25 +77,70 @@ const server = http.createServer((req, res) => {
                     res.write(contentRes);
                     res.end();
                 }
-                else if (/^\/categs\/[1-9][0-9]*\/subcategs/.test(urlParse.pathname)) {
+                // Test si l'url commence par « /categs/??/subcategs/?? »
+                else if (/^\/categs\/[1-9][0-9]*\/subcategs(\/[0-9]+)?/.test(urlParse.pathname)) {
+                    // Découpage de l'url
+                    const urlSplit = urlParse.pathname.split("/");
+                    console.log(urlSplit);
+                    // Exemple de valeur -> [ "", "categs", "42", "subcategs"]
 
-                    // Sous-categs :	localhost:3000/categs/42/subcategs
+                    // Récuperation de la categId (avec un parseInt)
+                    const categId = parseInt(urlSplit[2]);
 
-                    // Detail Sub 2 :	localhost:3000/categs/42/subcategs/2
+                    // Utilisation de la méthode "find" des array de JS
+                    // Pour obtenir l'objet "categ" sur base de la valeur "categId"
+                    // La condition est envoyé sous forme de Predicat : 
+                    // -> Pour chaque categorie, je teste si l'id est egale au "categId"
+                    const categ = datas.categs.find(c => c.id === categId);
+                    console.log(categ);
 
-                    // products : 	    localhost:3000/categs/42/subcategs/2/products
+                    if(categ !== undefined) {
+                        // Récuperation de la subCategId (Optionnel !!!)
+                        const subCategId = urlSplit[4] != undefined ? parseInt(urlSplit[4]) : null;
+                        
+                        // Sous-categs :	/categs/42/subcategs
+                        if(subCategId === null) {
+                            contentRes = `<h1>Categorie : ${categ.name}</h1>
+                                          <h2>Veuillez selectionner une sous-categorie</h2>
+                                          <ul>`;
 
-                    // product 13 :	    localhost:3000/categs/42/subcategs/2/products?prod=13
+                            categ.subcategs.forEach((subCateg) => {
+                                contentRes += `<li>
+                                                <a href="/categs/${categ.id}/subcategs/${subCateg.id}">
+                                                    ${subCateg.name}
+                                                </a>
+                                               </li>`;
+                            });
+ 
+                            contentRes += "</ul>";
 
+                            res.writeHead(statusCode, head);
+                            res.write(contentRes);
+                            res.end();
+                        }
+                        else {
+                            // Detail Sub 2 :	/categs/42/subcategs/2
+                            // products : 	    /categs/42/subcategs/2/products
+                            // product 13 :	    /categs/42/subcategs/2/products?prod=13
 
-
-                    res.writeHead(statusCode, head);
-                    res.write("Url -> " + urlParse.pathname);
-                    res.end();
+                            res.writeHead(statusCode, head);
+                            res.write("CategID -> " + categId );
+                            res.end();
+                        }
+                    }
+                    else {
+                        error404 = ":( Categorie non disponible";
+                    }
                 }
                 else {
+                    error404 = "Page invalide";
+                }
+
+
+                // En cas d'erreur => Affichage de la page
+                if(error404) {
                     res.writeHead(404, head);
-                    res.write("Not found");
+                    res.write(error404 + " -> " + urlParse.pathname);
                     res.end();
                 }
             }
