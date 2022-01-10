@@ -94,12 +94,12 @@ const server = http.createServer((req, res) => {
                     const categ = datas.categs.find(c => c.id === categId);
                     console.log(categ);
 
-                    if(categ !== undefined) {
+                    if (categ !== undefined) {
                         // Récuperation de la subCategId (Optionnel !!!)
                         const subCategId = urlSplit[4] != undefined ? parseInt(urlSplit[4]) : null;
-                        
+
                         // Sous-categs :	/categs/42/subcategs
-                        if(subCategId === null) {
+                        if (subCategId === null) {
                             contentRes = `<h1>Categorie : ${categ.name}</h1>
                                           <h2>Veuillez selectionner une sous-categorie</h2>
                                           <ul>`;
@@ -111,7 +111,7 @@ const server = http.createServer((req, res) => {
                                                 </a>
                                                </li>`;
                             });
- 
+
                             contentRes += "</ul>";
 
                             res.writeHead(statusCode, head);
@@ -120,13 +120,33 @@ const server = http.createServer((req, res) => {
                         }
                         else {
                             // Detail Sub 2 :	/categs/42/subcategs/2
-                            // products : 	    /categs/42/subcategs/2/products
-                            // product 13 :	    /categs/42/subcategs/2/products?prod=13
+                            const subCateg = categ.subcategs.find(sc => sc.id === subCategId);
 
-                            res.writeHead(statusCode, head);
-                            res.write("CategID -> " + categId );
-                            res.end();
+                            if (subCateg != undefined) {
+                                contentRes = `<h1>Categorie principal : ${categ.name}</h1>
+                                              <h2>Categorie secondaire : ${subCateg.name}</h2>
+                                              <br/>
+                                              <h3>Liste des produits</h3>
+                                              <ul>`;
+
+                                subCateg.products.forEach(product => {
+                                    contentRes += `<li>
+                                                    ${product.name} ${product.price} €
+                                                  </li>`;
+                                });
+
+                                contentRes += '</ul>';
+                                res.writeHead(statusCode, head);
+                                res.write(contentRes);
+                                res.end();
+                            }
+                            else {
+                                error404 = "Sous categorie inconnue";
+                            }
                         }
+
+                        // TODO : A faire par la suite ;)
+                        // product 13 :	    /categs/42/subcategs/2/products?prod=13
                     }
                     else {
                         error404 = ":( Categorie non disponible";
@@ -138,7 +158,7 @@ const server = http.createServer((req, res) => {
 
 
                 // En cas d'erreur => Affichage de la page
-                if(error404) {
+                if (error404) {
                     res.writeHead(404, head);
                     res.write(error404 + " -> " + urlParse.pathname);
                     res.end();
