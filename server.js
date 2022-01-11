@@ -38,7 +38,11 @@ const server = http.createServer((req, res) => {
                 contentRes = `<h1>Page d'accueil</h1>
                 <a href='/categs'>Vers les catégories principales</a>
                 <br/>
-                <a href='/contact'>Vers la page contact</a>`;
+                <a href='/contact'>Vers la page contact</a>
+                <br />
+                <a href="/demo?name=Leila&lastname=Myar">
+                    Demo GET -> /demo?name=Leila&lastname=Myar
+                </a>`;
 
                 res.writeHead(statusCode, head);
                 res.write(contentRes);
@@ -172,6 +176,12 @@ const server = http.createServer((req, res) => {
                     res.write(error404 + " -> " + urlParse.pathname);
                     res.end();
                 }
+            }
+            
+            else {
+                res.writeHead(404, head);
+                res.write('<h1>Vous etes perdu ? :o </h1>');
+                res.end();
             }
         }
         else if (req.method == "POST") {
