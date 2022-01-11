@@ -35,7 +35,9 @@ const server = http.createServer((req, res) => {
             if (urlParse.pathname == "/" || urlParse.pathname == "/accueil") {
                 statusCode = 200;
                 contentRes = `<h1>Page d'accueil</h1>
-            <a href='/categs'>Vers les catégories principales</a>`;
+                <a href='/categs'>Vers les catégories principales</a>
+                <br/>
+                <a href='/contact'>Vers la page contact</a>`;
 
                 res.writeHead(statusCode, head);
                 res.write(contentRes);
@@ -43,10 +45,14 @@ const server = http.createServer((req, res) => {
             }
             else if (urlParse.pathname == "/contact") {
                 statusCode = 200;
-                contentRes = `<h1>Page de contact en mode GET</h1>
-                <input type="text" name="name"><br>
-                <input type="text" name="lastname">
-                <button type="submit">Envoyer</button>`;
+                contentRes = `<h1>Page de contact</h1>
+                <form method="POST">
+                    <input type="text" name="name">
+                    <br>
+                    <input type="text" name="lastname">
+                    <br>
+                    <button type="submit">Envoyer</button>
+                </form>`;
 
                 res.writeHead(statusCode, head);
                 res.write(contentRes);
@@ -137,7 +143,7 @@ const server = http.createServer((req, res) => {
 
                                 contentRes += '</ul>';
                                 statusCode = 200;
-                                
+
                                 res.writeHead(statusCode, head);
                                 res.write(contentRes);
                                 res.end();
@@ -169,24 +175,36 @@ const server = http.createServer((req, res) => {
         }
         else if (req.method == "POST") {
             if (urlParse.pathname == "/contact") {
-                let body = "";
 
+                // Event "data" de la requete : Lecture des données POST de la requete
+                let body = "";
                 req.on('data', (form) => {
+                    console.log(form);
                     body += form.toString();
                 });
+                // Le contenu du "form" est au format hexadecimal (dans un buffer)
+                // => 6e 61 6d 65 3d 5a 61 7a 61 26 6c 61 73 74 6e 61 6d 65 3d 56 61 6e 64 65 72 71 75 61 63 6b
+                // Aprés convertion via la méthode "toString", cela donne : 
+                // => name=Zaza&lastname=Vanderquack
 
+
+                // Event "end" : Se déclanche après que les données ont été traité (cf: event "data")
                 req.on('end', () => {
+                    // Les données recu on été stocké dans la variable "body"
+                    console.log(body);
 
-                    //ici je suis dans la possibilité de recevoir de mon body (formulaire)
-                    // "name=loic&lastname=baudoux"    ====> STRING que je peux parser avec le décodeur
-                    // "{ 'name' : 'loic', 'lastname' : 'baudoux'}"     =====> STRING que je peux parser avec JSON.parse()
+                    let result;
+                    // Test pour savoir si les données ont de type : 
+                    //  - object json
+                    //  - x-www-form-urlencoded
+
                     if (body.startsWith("{") && body.endsWith("}"))
-                        body = JSON.parse(body);
-                    else {
+                        // Traitement si les données sont au format Json
+                        result = JSON.parse(body);
 
-                        /*
-                        Convertit "name=loic&lastname=baudoux" en JSON { 'name' : 'loic', 'lastname' : 'baudoux' } utilisable
-                        */
+                    else {
+                        // Traitement si les donénes sont au format x-www-form-urlencoded
+                        // -> clef1=contenu&clef2=contenu
                         body = JSON.parse('{"' + decodeURI(body).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"') + '"}');
                     }
 

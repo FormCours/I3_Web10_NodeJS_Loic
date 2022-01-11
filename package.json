@@ -8,5 +8,8 @@
     "start": "node server.js"
   },
   "author": "Loïc Baudoux",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "query-string": "^7.1.0"
+  }
 }
