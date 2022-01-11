@@ -1,7 +1,6 @@
 const http = require("http");
 const url = require("url");
 const fs = require("fs");
-const { parse } = require('path');
 
 
 const server = http.createServer((req, res) => {
@@ -113,6 +112,7 @@ const server = http.createServer((req, res) => {
                             });
 
                             contentRes += "</ul>";
+                            statusCode = 200;
 
                             res.writeHead(statusCode, head);
                             res.write(contentRes);
@@ -136,6 +136,8 @@ const server = http.createServer((req, res) => {
                                 });
 
                                 contentRes += '</ul>';
+                                statusCode = 200;
+                                
                                 res.writeHead(statusCode, head);
                                 res.write(contentRes);
                                 res.end();
