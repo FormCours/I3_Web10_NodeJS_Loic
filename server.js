@@ -1,6 +1,7 @@
 const http = require("http");
 const url = require("url");
 const fs = require("fs");
+const querystring = require('query-string');
 
 
 const server = http.createServer((req, res) => {
@@ -198,22 +199,36 @@ const server = http.createServer((req, res) => {
                     //  - object json
                     //  - x-www-form-urlencoded
 
-                    if (body.startsWith("{") && body.endsWith("}"))
+                    if (body.startsWith("{") && body.endsWith("}")){
                         // Traitement si les données sont au format Json
                         result = JSON.parse(body);
-
+                     }
                     else {
                         // Traitement si les donénes sont au format x-www-form-urlencoded
-                        // -> clef1=contenu&clef2=contenu
-                        body = JSON.parse('{"' + decodeURI(body).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"') + '"}');
+                        // body -> name=Zaza&lastname=Vanderquack
+                        
+                        // Conversion des données en format objet JS
+                        result = querystring.parse(body);
+                        // result -> { lastname: 'Vanderquack', name: 'Zaza' }
                     }
+                    console.log(result);
 
-                    console.log(body);
+
+                    // Utilisation des données dans la page de réponse
+                    statusCode = 200;
+                    contentRes = `
+                        <h1>Page de contact - Réponse</h1>
+                        <h2>Bienvenue ${result.name} ${result.lastname}</h2>
+                        <a href="/">Retourner à la page Home</a>
+                    `;
+
+                    res.writeHead(statusCode, head);
+                    res.end(contentRes)
                 });
 
 
-                //je traite le formulaire ici
-                //et puis je redirige mon client vers autre part.
+                // Exemple de redirection ↓
+                /*
                 statusCode = 303;
                 head = { "Location": "/" };
 
@@ -221,10 +236,10 @@ const server = http.createServer((req, res) => {
                 res.write(contentRes);
                 res.end();
 
-
                 // statusCode 302 -> redirection standard
                 // 307 -> passer de get à post puis redirger vers le meme lien en post 
                 // 303 -> passer de get à post puis redirger vers un autre lien en get 
+                */
             }
         }
         else {
