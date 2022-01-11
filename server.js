@@ -177,7 +177,13 @@ const server = http.createServer((req, res) => {
                     res.end();
                 }
             }
-            
+            else if(urlParse.pathname == "/demo") {
+                // Traitement les données GET
+
+
+
+                
+            }
             else {
                 res.writeHead(404, head);
                 res.write('<h1>Vous etes perdu ? :o </h1>');
