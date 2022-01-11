@@ -178,11 +178,29 @@ const server = http.createServer((req, res) => {
                 }
             }
             else if(urlParse.pathname == "/demo") {
-                // Traitement les données GET
+                //  - Traitement les données GET
+                // La requete à été traité avec le module "url" pour traité les infos.
+                // -> Voir la ligne 9 du code « const urlParse = url.parse(req.url, true) »
 
+                // Les données envoyer par l'url en mode GET sont accessible 
+                // sur la propriété "Search" -> ?name=Leila&lastname=Myar
+                console.log(urlParse.search);
 
+                // Les données seront traité lors de la requete sous forme d'objet JS
+                // et ajouter dans la propriété "Query"
+                const dataGet = urlParse.query
+                console.log(dataGet);
 
-                
+                statusCode = 200;
+                contentRes = `
+                    <h1>Reception des données "GET"</h1>
+                    <h2>Les données recu sont : </h2>
+                    <p>${dataGet.name} ${dataGet.lastname}</p>
+                `;
+
+                res.writeHead(statusCode, head);
+                res.write(contentRes);
+                res.end();
             }
             else {
                 res.writeHead(404, head);
